@@ -3,77 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>奧修禪卡解讀器</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>奧修禪卡 · 覺察</title>
     <style>
         :root {
             --zen-bg: #fdfaf5;
-            --zen-dark: #4a4a4a;
-            --zen-accent: #9a8c73;
+            --zen-dark: #333333;
+            --zen-accent: #8e7d5f;
+            --zen-input: #ffffff;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
             background-color: var(--zen-bg);
             color: var(--zen-dark);
             margin: 0;
             padding: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
         .app-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             background: white;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 30px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            height: fit-content;
+            margin-top: 40px;
         }
         h2 {
             text-align: center;
             font-weight: 300;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
             color: var(--zen-accent);
+            margin-bottom: 30px;
         }
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #888;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            color: #999;
+            letter-spacing: 1px;
         }
         textarea, input {
             width: 100%;
             border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 15px;
             box-sizing: border-box;
             font-size: 1rem;
             background: #fafafa;
+            transition: all 0.3s;
+            outline: none;
+        }
+        textarea:focus, input:focus {
+            border-color: var(--zen-accent);
+            background: white;
         }
         button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             background-color: var(--zen-accent);
             color: white;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: opacity 0.3s;
+            transition: transform 0.2s, opacity 0.2s;
+            margin-top: 10px;
         }
         button:active {
-            opacity: 0.7;
+            transform: scale(0.98);
+            opacity: 0.9;
         }
-        .hint {
-            font-size: 0.8rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
-        /* PWA 模擬樣式 */
-        @media (display-mode: standalone) {
-            body { padding-top: 50px; }
+        .footer-note {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #ccc;
+            margin-top: 30px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -83,46 +97,43 @@
     <h2>禪 · 覺察</h2>
     
     <div class="input-group">
-        <label>你的問題</label>
-        <textarea id="question" rows="3" placeholder="例如：我當下的內在狀態？"></textarea>
+        <label>內心的提問</label>
+        <textarea id="question" rows="3" placeholder="請輸入你想探索的問題..."></textarea>
     </div>
 
     <div class="input-group">
-        <label>抽到的牌卡 (1-5張，用逗號分隔)</label>
-        <input type="text" id="cards" placeholder="例如：Silence, 蛻變 正位">
-        <div class="hint">支援中英文、正逆位</div>
+        <label>抽到的牌卡 (1-5張)</label>
+        <input type="text" id="cards" placeholder="如：空, 轉向內在 正位">
     </div>
 
-    <button onclick="sendToAI()">開始解讀</button>
+    <button onclick="sendToAI()">開啟解讀</button>
+
+    <div class="footer-note">
+        點擊後將連結至 Gemini 進行深度解讀<br>
+        建議在手機瀏覽器點選「加入主畫面」使用
+    </div>
 </div>
 
 <script>
-    <script>
     function sendToAI() {
-        const question = document.getElementById('question').value;
-        const cards = document.getElementById('cards').value;
+        const q = document.getElementById('question').value.trim();
+        const c = document.getElementById('cards').value.trim();
         
-        if(!question || !cards) {
-            alert("請填寫問題與牌卡");
+        if(!q || !c) {
+            alert("請完整填寫問題與牌卡名稱。");
             return;
         }
 
-        // 這裡封裝了你所有的解讀原則，確保每次跳轉後 Gemini 都會遵守
-        const prompt = `請啟動奧修禪卡專家模式，嚴格遵守以下原則：
-1. 全程繁體中文。
-2. 聚焦內在覺察，不預測未來。
-3. 結合官方79張牌義與圖像象徵。
-4. 語氣溫柔直接，有禪意不說教。
-5. 直接解讀，不需解釋流程。
-
-問題：${question} 
-牌：${cards}`;
+        // 這是預設給 AI 的指令內容
+        const systemRules = "請擔任奧修禪卡專家，嚴格遵守原則：1.全程繁體中文 2.聚焦內在覺察不預測未來 3.結合官方79張牌義與圖像象徵 4.語氣溫柔直接有禪意不說教 5.直接解讀。";
         
-        // 使用 google.com/search 的特殊參數，這能更穩定地將文字帶入 Gemini 介面
-        const encodedMsg = encodeURIComponent(prompt);
-        window.location.href = `https://www.google.com/search?q=${encodedMsg}&btnI=I`;
+        const finalMessage = `\${systemRules}\\n\\n問題：\${q}\\n牌卡：\${c}`;
         
-        // 如果上述方式在部分手機失效，可嘗試備用方案：
-        // window.location.href = `https://gemini.google.com/app?q=${encodedMsg}`;
+        // 這是最重要的跳轉網址，使用 Gemini 官方 App 入口
+        const encodedMsg = encodeURIComponent(finalMessage);
+        window.location.href = `https://gemini.google.com/app?q=\${encodedMsg}`;
     }
 </script>
+
+</body>
+</html>
