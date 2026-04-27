@@ -97,6 +97,7 @@
 </div>
 
 <script>
+    <script>
     function sendToAI() {
         const question = document.getElementById('question').value;
         const cards = document.getElementById('cards').value;
@@ -106,14 +107,22 @@
             return;
         }
 
-        // 這裡會將需求格式化，並直接開啟與我的對話
-        const systemPrompt = `解讀原則：全程繁體中文、聚焦內在覺察不預測未來、結合官方79張牌義、溫柔直接有禪意。\\n\\n問題：\${question} 牌：\${cards}`;
+        // 這裡封裝了你所有的解讀原則，確保每次跳轉後 Gemini 都會遵守
+        const prompt = `請啟動奧修禪卡專家模式，嚴格遵守以下原則：
+1. 全程繁體中文。
+2. 聚焦內在覺察，不預測未來。
+3. 結合官方79張牌義與圖像象徵。
+4. 語氣溫柔直接，有禪意不說教。
+5. 直接解讀，不需解釋流程。
+
+問題：${question} 
+牌：${cards}`;
         
-        // 自動跳轉至 Gemini 並帶入訊息 (需手機有安裝 App 或登入網頁版)
-        const encodedMsg = encodeURIComponent(`問題：\${question} 牌：\${cards}`);
-        window.location.href = `https://gemini.google.com/app?q=\${encodedMsg}`;
+        // 使用 google.com/search 的特殊參數，這能更穩定地將文字帶入 Gemini 介面
+        const encodedMsg = encodeURIComponent(prompt);
+        window.location.href = `https://www.google.com/search?q=${encodedMsg}&btnI=I`;
+        
+        // 如果上述方式在部分手機失效，可嘗試備用方案：
+        // window.location.href = `https://gemini.google.com/app?q=${encodedMsg}`;
     }
 </script>
-
-</body>
-</html>
